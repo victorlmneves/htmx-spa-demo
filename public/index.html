@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMX SPA Demo</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+    <script>
+        // Use document instead of document.body since body may not exist yet
+        document.addEventListener('htmx:beforeSwap', (evt) => {
+            if (document.startViewTransition) {
+                evt.detail.shouldSwap = false;
+
+                document.startViewTransition(() => {
+                    evt.detail.target.innerHTML = evt.detail.xhr.responseText;
+                });
+            }
+        });
+
+        function setActiveLink(url) {
+            for (const a of document.querySelectorAll('nav a')) {
+                a.classList.toggle('active', a.getAttribute('href') === url);
+            }
+        }
+
+        document.addEventListener('htmx:afterSwap', (evt) => {
+            setActiveLink(globalThis.location.pathname);
+        });
+
+        globalThis.addEventListener('DOMContentLoaded', () => {
+            setActiveLink(globalThis.location.pathname);
+        });
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <img src="/assets/logo.png" alt="Logo" width="40" height="40">
+            <a href="/index.html" hx-get="/" hx-target="#content" hx-push-url="true">Home</a>
+            <a href="/about.html" hx-get="/about.html" hx-target="#content" hx-push-url="true">About</a>
+            <a href="/contact.html" hx-get="/contact.html" hx-target="#content" hx-push-url="true">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Main content where HTMX will swap in new content -->
+    <main id="content">
+        <h1>Home Page</h1>
+        <p>Welcome to the home page! Click the links above to navigate without reloading the page.</p>
+    </main>
+</body>
+
+</html>
